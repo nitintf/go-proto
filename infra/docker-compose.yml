@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  api:
+    image: go-api:latest
+    ports:
+      # public API
+      - "50005:50005"
+      # internal API
+      - "40004:40004"
+    environment:
+      DD_AGENT_HOST:
+      # DRIVERLESS_CONTROL_AUTHZ_API_KEY:
+      API_GRPC_PORT: 50005
+      INTERNAL_API_GRPC_PORT: 40004
+      ENV: local
+      LOG_LEVEL: info
+      LOG_FORMAT: text
+      SENTRY_DSN:
+      SPANNER_DSN: projects/driverless-control-local/instances/driverless-control/databases/driverless-control
+      SPANNER_EMULATOR_HOST: spanner:9010
+    depends_on: [ 'spanner' ]
+    networks:
+      - go-api-network
+    
+  spanner:
+    # See https://github.com/RoryQ/spanner-emulator
+    # This wraps the official emulator image, also creating the database and instance on startup.
+    image: roryq/spanner-emulator
+    ports:
+      - "9010:9010"
+      - "9020:9020"
+    environment:
+      - SPANNER_PROJECT_ID=go-api-local
+      - SPANNER_INSTANCE_ID=gp-api
+      - SPANNER_DATABASE_ID=gp-api
+    networks:
+      - go-api-network
+
+networks:
+  go-api-network:
+    driver: bridge
+    name: go-api-network

@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package api.v1;
+
+// import "google/protobuf/timestamp.proto";
+
+option go_package = "./go/api/v1";
+
+message Error {
+  string error = 1;
+  optional string details = 2;
+}
+
+message UserRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message User {
+  string email = 2;
+  string id = 3;
+}
+
+service GoApiService {
+  rpc login(UserRequest) returns (User) {}
+  rpc SignUp(UserRequest) returns (User) {}
+}
